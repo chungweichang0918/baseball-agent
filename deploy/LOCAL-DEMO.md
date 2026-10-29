@@ -5,7 +5,7 @@
 
 ## 首次發布
 
-1. 在終端執行 `gh auth login`，選 GitHub.com，依提示用瀏覽器登入你的 GitHub 帳號。不要把 token 貼進聊天。
+1. 使用既有 Git Credential Manager 登入，或在終端執行 `gh auth login`。本機已驗證 Git Credential Manager 可推送到此專案。不要把 token 貼進聊天。
 2. 把本專案來源提交到你提供的 baseball-agent 專案（排除 .env、.venv、runs、cache、影片與模型權重，已有 .gitignore）。遠端已有內容時先同步，不要強制推送。
 3. 到該專案 Settings → Pages，Build and deployment 的 Source 選 GitHub Actions。然後執行 Actions 裡的 Publish baseball demo website，或推送 docs/ 變更觸發部署。
 4. 初始網址為 https://chungweichang0918.github.io/baseball-agent/baseball/ 。這是預計網址，Actions 成功後才會存在。
@@ -21,7 +21,7 @@ Windows 雙擊根目錄的 `start-demo.cmd`，或在專案根目錄執行：
 ```
 
 程式在本機執行模型，以 Gradio 分享連結提供臨時 HTTPS 服務，將連結更新到 docs/baseball/config.json。
-`--publish` 使用已登入的 GitHub CLI 更新遠端同一個設定檔；Pages 工作流程隨後重新發布，所以啟動後需等待部署完成。
+`--publish` 使用 GitHub CLI 或既有 Git Credential Manager 更新遠端同一個設定檔；Pages 工作流程隨後重新發布，所以啟動後需等待部署完成。
 如果尚未登入或來源尚未首次發布，會保留直接展示連結，並清楚告知網站設定尚未更新。
 
 展示期間保持電腦、視窗與網路開啟；取得連結的人可上傳影片使用此分析服務。
@@ -42,3 +42,7 @@ Windows 雙擊根目錄的 `start-demo.cmd`，或在專案根目錄執行：
 使用子網域後，站台根目錄會轉到 /baseball/；兩者都使用同一份 docs/baseball/config.json。
 
 此方案不需要 Namecheap 主機或付費雲端後端。外部分享服務的可用性與有效期仍依 Gradio 服務為準。
+
+## 此電腦目前的驗證結果
+
+已成功推送來源、啟用 GitHub Pages 並發出部署要求。本機分析可啟動，但 Gradio 的 frpc 分享程式在 CreateProcess 階段被 Windows 拒絕執行（WinError 5），因此尚未取得公開分析連結。未修改防毒或系統安全設定。此限制須在電腦上釐清後，再執行 start-demo.cmd；取得成功連結前，網站會保留「分析服務尚未接上」。

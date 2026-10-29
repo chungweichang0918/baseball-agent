@@ -4,10 +4,13 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
 import re
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,25 +29,50 @@ def write_config(root: Path, url: str) -> None:
     temporary.replace(path)
 
 
+def github_api(endpoint: str, payload: dict | None = None) -> dict:
+    """Prefer gh; fall back to the same Git credential helper used by git push."""
+    command = ["gh", "api", endpoint]
+    if payload is not None:
+        command += ["--method", "PUT", "--input", "-"]
+    try:
+        result = subprocess.run(command, input=None if payload is None else json.dumps(payload),
+                                capture_output=True, text=True, encoding="utf-8")
+        if result.returncode == 0:
+            return json.loads(result.stdout) if result.stdout.strip() else {}
+    except FileNotFoundError:
+        pass
+    environment = dict(os.environ, GIT_TERMINAL_PROMPT="0", GCM_INTERACTIVE="Never")
+    stored = subprocess.run(["git", "credential", "fill"], input="protocol=https\nhost=github.com\n\n",
+                             capture_output=True, text=True, encoding="utf-8", env=environment)
+    fields = dict(line.split("=", 1) for line in stored.stdout.splitlines() if "=" in line)
+    if stored.returncode or not fields.get("password") or not fields.get("username"):
+        raise RuntimeError("請先登入 GitHub CLI 或 Git Credential Manager")
+    authorization = base64.b64encode((fields["username"] + ":" + fields["password"]).encode()).decode()
+    request = urllib.request.Request("https://api.github.com/" + endpoint,
+        method="GET" if payload is None else "PUT",
+        data=None if payload is None else json.dumps(payload).encode(),
+        headers={"Authorization": "Basic " + authorization, "Accept": "application/vnd.github+json",
+                 "User-Agent": "Diamond-Studio-Deployment", "X-GitHub-Api-Version": "2022-11-28"})
+    try:
+        with urllib.request.urlopen(request, timeout=25) as response:
+            return json.loads(response.read())
+    except urllib.error.HTTPError as error:
+        raise RuntimeError(f"GitHub 更新失敗（HTTP {error.code}）") from None
+
+
 def publish_url(repo: str, url: str, *, expected: str | None = None) -> bool:
     """Update only this site's config; avoid clearing a newer demo on shutdown."""
     if not re.fullmatch(r"[\w.-]+/[\w.-]+", repo):
         raise ValueError("GitHub 專案需為 owner/repository")
     endpoint = f"repos/{repo}/contents/docs/baseball/config.json"
-    read = subprocess.run(["gh", "api", endpoint], capture_output=True, text=True, encoding="utf-8")
-    if read.returncode:
-        raise RuntimeError("無法讀取遠端網站設定；請先登入 GitHub 並發布網站來源")
-    current = json.loads(read.stdout)
+    current = github_api(endpoint)
     if expected is not None:
         value = json.loads(base64.b64decode(current["content"]).decode("utf-8"))
         if value.get("analysis_url") != expected:
             return False
     payload = {"message": "Update local baseball demo connection", "sha": current["sha"],
                "content": base64.b64encode(config_text(url).encode("utf-8")).decode("ascii")}
-    update = subprocess.run(["gh", "api", "--method", "PUT", endpoint, "--input", "-"],
-                            input=json.dumps(payload), capture_output=True, text=True, encoding="utf-8")
-    if update.returncode:
-        raise RuntimeError("網站設定更新失敗；本機分析仍持續執行，請重新發布 config.json")
+    github_api(endpoint, payload)
     return True
 
 
