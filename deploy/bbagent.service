@@ -1,0 +1,21 @@
+# TEMPLATE for a Linux server with systemd. Set up this user and path first.
+[Unit]
+Description=Diamond Studio baseball analysis
+After=network.target
+
+[Service]
+Type=simple
+User=bbagent
+WorkingDirectory=/opt/baseball-tactics-agent
+Environment=PYTHONUNBUFFERED=1
+Environment=GRADIO_ANALYTICS_ENABLED=False
+Environment=MPLCONFIGDIR=/opt/baseball-tactics-agent/cache/matplotlib
+Environment=YOLO_CONFIG_DIR=/opt/baseball-tactics-agent/cache/yolo
+Environment=GRADIO_TEMP_DIR=/opt/baseball-tactics-agent/runs/uploads
+EnvironmentFile=-/etc/bbagent.env
+ExecStart=/opt/baseball-tactics-agent/.venv/bin/python scripts/app.py --host 127.0.0.1 --port 7860 --max-file-size 200mb
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

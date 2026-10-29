@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.uv-cache/
+
+# 機密
+.env
+
+# 大型檔案與執行產物
+models/*.pt
+cache/
+runs/
+data/samples/*.mp4
+data/samples/*.mov
+data/samples/*.m4v
+
+# macOS
+.DS_Store

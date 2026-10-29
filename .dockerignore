@@ -1,0 +1,14 @@
+.git
+.env
+.env.*
+.venv
+.uv-cache
+.pytest_cache
+**/__pycache__
+models
+cache
+runs
+data/samples
+deploy
+notebooks
+tests

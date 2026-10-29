@@ -1,0 +1,61 @@
+{
+  "meta": {
+    "league": "MLB",
+    "seasons": "2010–2015",
+    "source": "Tom Tango, Run Expectancy (RE24) table, https://tangotiger.net/re24.html",
+    "method": "實際得分統計：每個壘包出局狀態之後到半局結束的平均得分；只計已完成的半局，且只取 1–8 局",
+    "verified": "2026-10-29 已與來源表格逐項核對，24 個數值完全一致",
+    "attribution": "The information used here was obtained free of charge from and is copyrighted by Retrosheet. Interested parties may contact Retrosheet at www.retrosheet.org.",
+    "note": "2023 年起 MLB 實施投球計時、牽制次數限制與加大壘包，盜壘環境與本表年份不同。若作業背景是中華職棒，聯盟得分環境也不同。報告中應列為限制。"
+  },
+  "bases_key_format": "三個字元依序代表一、二、三壘，有人寫壘號，沒人寫 _，例如 1_3 表示一三壘有人",
+  "outs_index": "陣列中的三個數字依序代表 0、1、2 出局",
+  "table": {
+    "___": [0.481, 0.254, 0.098],
+    "1__": [0.859, 0.509, 0.224],
+    "_2_": [1.100, 0.664, 0.319],
+    "12_": [1.437, 0.884, 0.429],
+    "__3": [1.350, 0.950, 0.353],
+    "1_3": [1.784, 1.130, 0.478],
+    "_23": [1.964, 1.376, 0.580],
+    "123": [2.292, 1.541, 0.752]
+  },
+  "options": {
+    "steal_2b": {
+      "label": "盜二壘",
+      "role": "offense",
+      "requires": ["1"],
+      "requires_empty": ["2"],
+      "description": "成功：一壘跑者上二壘，出局數不變。失敗：一壘跑者出局。"
+    },
+    "steal_3b": {
+      "label": "盜三壘",
+      "role": "offense",
+      "requires": ["2"],
+      "requires_empty": ["3"],
+      "description": "成功：二壘跑者上三壘，出局數不變。失敗：二壘跑者出局。"
+    },
+    "sac_bunt": {
+      "label": "犧牲觸擊",
+      "role": "offense",
+      "requires_any_runner": true,
+      "forbid_outs": [2],
+      "description": "打者出局，所有跑者推進一個壘包；三壘跑者回本壘得分。"
+    },
+    "swing_away": {
+      "label": "正常強攻",
+      "role": "offense",
+      "description": "不採取特殊戰術，以目前狀態的得分期望值作為比較基準。"
+    },
+    "ibb": {
+      "label": "故意四壞",
+      "role": "defense",
+      "description": "打者上一壘，只有被擠壓的跑者推進；滿壘時三壘跑者得分。"
+    },
+    "pitch_to_batter": {
+      "label": "正面對決",
+      "role": "defense",
+      "description": "不敬遠，以目前狀態的得分期望值作為比較基準。"
+    }
+  }
+}

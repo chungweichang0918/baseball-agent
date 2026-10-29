@@ -1,0 +1,47 @@
+# 推論裝置：auto | mps | cuda | cpu
+# auto 依序嘗試 mps → cuda → cpu
+device: auto
+
+models:
+  dir: models
+  detector: yolov8m.pt        # 想換 YOLO11 時改成 yolo11m.pt
+  pose: yolov8m-pose.pt       # 對應 yolo11m-pose.pt
+
+vision:
+  # Pass 1 粗掃：找主體、切動作週期
+  coarse_scan:
+    target_fps: 30      # 取樣後的等效 fps；60 fps 影片每 2 幀取 1，30 fps 影片逐幀
+
+    imgsz: 640
+    conf: 0.25
+  # Pass 2 精掃：出手／擊球時間窗內逐幀追球
+  fine_scan:
+    imgsz: 1280
+    conf: 0.10
+  # COCO 類別 ID
+  classes:
+    person: 0
+    sports_ball: 32
+    baseball_bat: 34
+    baseball_glove: 35
+
+llm:
+  # 執行 `python scripts/check_env.py --list-models` 確認目前可用的型號後更新
+  # 不要用 *-latest 別名：型號會在背後自動切換，結果無法重現
+  # 2026-10-29 實測（免費層級）：gemini-3.8-flash 看 4 張圖要 303 秒，太慢；
+  # gemini-3.1-flash-lite 只要 2.5 秒，但會漏判鏡頭移動，這部分改由 OpenCV 判斷。
+  # 免費層級不提供 Pro 系列（gemini-3.1-pro-preview 的額度為 0）。
+  fast_model: gemini-3.1-flash-lite     # Planner、Critic、scout_overview
+  pro_model: gemini-3.1-flash-lite      # gemini_inspect、Synthesizer
+  max_retries: 3
+  timeout_s: 90         # 單次請求的逾時；SDK 預設不設逾時，伺服器慢時會一直等下去
+  thinking_level: null  # minimal / low / medium / high（只適用 Gemini 3 系列）；null 表示用模型預設
+  # auto：同樣的輸入重播快取的回應，不重複消耗額度｜off：一律呼叫 API｜replay：只能重播（離線展示）
+  cache_mode: auto
+
+paths:
+  cache: cache
+  runs: runs
+  re24: data/re24.json
+  samples: data/samples
+  labels: data/samples/labels
