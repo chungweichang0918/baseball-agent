@@ -1,5 +1,7 @@
 # 多模態棒球戰術決策 Agent
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/chungweichang0918/baseball-tactics-agent/blob/main/notebooks/colab_demo.ipynb)
+
 上傳 10–15 秒的棒球短影片並填入賽況。Agent 先用 YOLO 分析投手或打者的動作（投手另外追蹤球軌跡），再結合 RE24 得分期望值與 Gemini 推理，產出戰術建議報告。完整設計見上一層目錄的 `系統規劃書.md`。
 
 ## Diamond Studio：整合投打與守備工作台
@@ -178,7 +180,7 @@ uv run python scripts/run_agent.py data/samples/b_side_01.mp4 --target batter --
 
 `notebooks/colab_demo.ipynb` 是作業繳交用的教材式筆記本：一段說明配一小格程式，依序展示偵察 → Planner（含計畫檢查）→ Tool Use → Synthesizer → Critic（含注入錯誤的規則檢查），再介紹設計模式與參考文獻，最後才用 `run_agent()` 串起全部並啟動 Gradio 工作台。
 
-- 程式碼可以從 GitHub、公開的 Drive 連結或自己的 Drive 取得。放上 GitHub 時，把第一格 Colab 按鈕網址中的 `<GitHub帳號>` 換掉。
+- 預設從本專案的 GitHub repo 取得程式碼；也可以改用公開的 Drive 連結或自己的 Drive。
 - 金鑰放在 Colab 的 Secrets（`GEMINI_API_KEY`），不要寫在筆記本裡；沒有金鑰也能跑完（Gemini 步驟改用預設流程）。
 - 會額外消耗 API 額度或公開連結的格子都預設關閉（`RUN_…`、`START_DEMO` 改成 `True` 才執行）。
 - `data/samples/*.mp4` 不進 Git；找不到範例影片時，筆記本會請你上傳。
